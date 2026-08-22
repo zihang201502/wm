@@ -1,0 +1,392 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html, body {
+    height: 100%;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+    background: #000;
+    color: #fff;
+    overflow-x: hidden;
+}
+
+/* 导航栏 */
+nav {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 24px 48px;
+    z-index: 100;
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.nav-brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 16px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+}
+
+.nav-brand img {
+    width: 28px;
+    height: 28px;
+}
+
+.nav-links {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.nav-link {
+    padding: 8px 20px;
+    color: rgba(255, 255, 255, 0.6);
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 500;
+    border-radius: 999px;
+    transition: all 0.3s ease;
+}
+
+.nav-link:hover {
+    color: #fff;
+    background: rgba(255, 255, 255, 0.08);
+}
+
+.nav-link.active {
+    color: #000;
+    background: #fff;
+    font-weight: 600;
+}
+
+/* 主内容区 */
+main {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    padding: 120px 24px 80px;
+    position: relative;
+}
+
+/* 背景光晕 */
+.glow {
+    position: absolute;
+    width: 600px;
+    height: 600px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(180, 255, 240, 0.08) 0%, transparent 70%);
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    pointer-events: none;
+    animation: pulse 6s ease-in-out infinite;
+    transition: transform 0.3s ease-out;
+}
+
+@keyframes pulse {
+    0%, 100% { opacity: 0.6; }
+    50% { opacity: 1; }
+}
+
+h1 {
+    font-size: clamp(40px, 6vw, 72px);
+    font-weight: 700;
+    letter-spacing: -2px;
+    line-height: 1.1;
+    margin-bottom: 12px;
+    background: linear-gradient(180deg, #ffffff 0%, #a0e8d8 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    opacity: 0;
+    transform: translateY(20px);
+    animation: fadeInUp 1s ease forwards;
+    animation-delay: 0.1s;
+}
+
+.subtitle {
+    font-size: clamp(16px, 2vw, 22px);
+    font-weight: 300;
+    color: rgba(255, 255, 255, 0.5);
+    letter-spacing: 4px;
+    margin-bottom: 48px;
+    opacity: 0;
+    transform: translateY(20px);
+    animation: fadeInUp 1s ease forwards;
+    animation-delay: 0.25s;
+}
+
+@keyframes fadeInUp {
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* 联系卡片列表 */
+.contact-list {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    width: 100%;
+    max-width: 560px;
+}
+
+.contact-card {
+    display: flex;
+    align-items: flex-start;
+    gap: 20px;
+    padding: 28px;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 20px;
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    text-align: left;
+    opacity: 0;
+    transform: translateY(20px);
+    animation: fadeInUp 0.8s ease forwards;
+    transition: all 0.3s ease;
+}
+
+.contact-card:nth-child(1) {
+    animation-delay: 0.4s;
+}
+
+.contact-card:nth-child(2) {
+    animation-delay: 0.55s;
+}
+
+.contact-card:hover {
+    background: rgba(255, 255, 255, 0.07);
+    border-color: rgba(160, 232, 216, 0.2);
+    transform: translateY(-2px);
+}
+
+.contact-avatar {
+    width: 56px;
+    height: 56px;
+    border-radius: 16px;
+    object-fit: cover;
+    flex-shrink: 0;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.contact-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.contact-name {
+    font-size: 18px;
+    font-weight: 600;
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.contact-role {
+    font-size: 12px;
+    font-weight: 400;
+    color: rgba(255, 255, 255, 0.5);
+    background: rgba(255, 255, 255, 0.08);
+    padding: 3px 10px;
+    border-radius: 6px;
+}
+
+.contact-wechat {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 8px;
+    font-size: 14px;
+}
+
+.contact-wechat:last-child {
+    margin-bottom: 0;
+}
+
+.wx-label {
+    font-size: 11px;
+    color: rgba(255, 255, 255, 0.4);
+    background: rgba(255, 255, 255, 0.08);
+    padding: 2px 8px;
+    border-radius: 4px;
+    flex-shrink: 0;
+}
+
+.wx-text {
+    color: rgba(255, 255, 255, 0.8);
+    flex: 1;
+}
+
+.wx-id {
+    font-family: "SF Mono", "Consolas", monospace;
+    color: #a0e8d8;
+    flex: 1;
+}
+
+.wx-copy {
+    font-size: 12px;
+    color: rgba(255, 255, 255, 0.6);
+    cursor: pointer;
+    padding: 4px 12px;
+    border-radius: 6px;
+    background: rgba(255, 255, 255, 0.08);
+    transition: all 0.2s ease;
+    flex-shrink: 0;
+    user-select: none;
+}
+
+.wx-copy:hover {
+    background: rgba(255, 255, 255, 0.15);
+    color: #fff;
+}
+
+.wx-copy.copied {
+    background: #a0e8d8;
+    color: #000;
+}
+
+/* 打赏区域 */
+.donate-section {
+    margin-top: 40px;
+    padding: 32px;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 20px;
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    text-align: center;
+    max-width: 560px;
+    width: 100%;
+    opacity: 0;
+    transform: translateY(20px);
+    animation: fadeInUp 0.8s ease forwards;
+    animation-delay: 0.7s;
+}
+
+.donate-text {
+    font-size: 18px;
+    font-weight: 600;
+    color: #fff;
+    line-height: 1.6;
+    margin-bottom: 20px;
+}
+
+.donate-sub {
+    font-size: 13px;
+    font-weight: 400;
+    color: rgba(255, 255, 255, 0.5);
+}
+
+.donate-qr {
+    width: 180px;
+    height: 180px;
+    border-radius: 12px;
+    object-fit: cover;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* 成为开发者 */
+.dev-section {
+    margin-top: 20px;
+    padding: 32px;
+    background: rgba(160, 232, 216, 0.05);
+    border: 1px solid rgba(160, 232, 216, 0.15);
+    border-radius: 20px;
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    text-align: center;
+    max-width: 560px;
+    width: 100%;
+    opacity: 0;
+    transform: translateY(20px);
+    animation: fadeInUp 0.8s ease forwards;
+    animation-delay: 0.85s;
+}
+
+.dev-title {
+    font-size: 22px;
+    font-weight: 700;
+    margin-bottom: 10px;
+    background: linear-gradient(180deg, #ffffff 0%, #a0e8d8 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.dev-desc {
+    font-size: 14px;
+    color: rgba(255, 255, 255, 0.6);
+    margin-bottom: 20px;
+    line-height: 1.6;
+}
+
+.dev-contact {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 16px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 10px;
+    font-size: 14px;
+}
+
+/* 页脚 */
+footer {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    text-align: center;
+    padding: 20px;
+    font-size: 13px;
+    color: rgba(255, 255, 255, 0.35);
+    letter-spacing: 0.5px;
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+}
+
+/* 响应式 */
+@media (max-width: 640px) {
+    nav {
+        padding: 16px 20px;
+    }
+    .nav-brand span {
+        display: none;
+    }
+    .nav-link {
+        padding: 6px 14px;
+        font-size: 13px;
+    }
+    .contact-card {
+        padding: 20px;
+        gap: 14px;
+    }
+    .contact-avatar {
+        width: 44px;
+        height: 44px;
+        border-radius: 12px;
+    }
+    .contact-name {
+        font-size: 16px;
+    }
+}
