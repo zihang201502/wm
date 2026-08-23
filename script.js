@@ -46,8 +46,8 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // ========== 一键三连（跨设备云同步）==========
     // ====== 配置区域：去 https://jsonbin.io 注册后填入 ======
-    const JSONBIN_MASTER_KEY = '';  // 你的 X-Master-Key
-    const JSONBIN_BIN_ID = '';       // 你的 Bin ID（创建bin后URL里那串）
+    const JSONBIN_MASTER_KEY = '$2a$10$4ZQPSoorA31jBqAmiXEtiezKoaJbTBIyaFopE.ReZSqPI8vbT3S4S';  // 你的 X-Master-Key
+    const JSONBIN_BIN_ID = '6a8afa51da38895dfe06edf7';       // 你的 Bin ID（创建bin后URL里那串）
     // ========================================================
 
     const LOCAL_STATE_KEY = 'cumulus_triple_state'; // 本地只存用户操作状态
@@ -158,17 +158,16 @@ document.addEventListener('DOMContentLoaded', function () {
     renderTriple();
     fetchCounts();
 
-    // 点赞（永久一次，不可取消）
+    // 点赞（可切换：点了不能重复加，可取消后再点）
     if (likeBtn) {
         likeBtn.addEventListener('click', function () {
             if (userState.liked) {
-                likeBtn.style.transition = 'all 0.1s';
-                likeBtn.style.borderColor = 'rgba(255,80,80,0.6)';
-                setTimeout(function () { likeBtn.style.borderColor = ''; }, 600);
-                return;
+                counts.like = Math.max(0, counts.like - 1);
+                userState.liked = false;
+            } else {
+                counts.like += 1;
+                userState.liked = true;
             }
-            counts.like += 1;
-            userState.liked = true;
             saveUserState();
             renderTriple();
             popBtn(likeBtn);
@@ -176,17 +175,16 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
-    // 收藏（永久一次，不可取消）
+    // 收藏（可切换：点了不能重复加，可取消后再点）
     if (favBtn) {
         favBtn.addEventListener('click', function () {
             if (userState.faved) {
-                favBtn.style.transition = 'all 0.1s';
-                favBtn.style.borderColor = 'rgba(255,80,80,0.6)';
-                setTimeout(function () { favBtn.style.borderColor = ''; }, 600);
-                return;
+                counts.fav = Math.max(0, counts.fav - 1);
+                userState.faved = false;
+            } else {
+                counts.fav += 1;
+                userState.faved = true;
             }
-            counts.fav += 1;
-            userState.faved = true;
             saveUserState();
             renderTriple();
             popBtn(favBtn);
