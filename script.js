@@ -44,32 +44,38 @@ document.addEventListener('DOMContentLoaded', function () {
         }, 2000);
     }
 
-    // ========== 一键三连 ==========
-    const STORAGE_KEY = 'cumulus_triple_data';
+    // ========== 一键三连（跨设备云同步）==========
+    // ====== 配置区域：去 https://jsonbin.io 注册后填入 ======
+    const JSONBIN_MASTER_KEY = '';  // 你的 X-Master-Key
+    const JSONBIN_BIN_ID = '';       // 你的 Bin ID（创建bin后URL里那串）
+    // ========================================================
 
-    // 读取数据
-    function loadTriple() {
+    const LOCAL_STATE_KEY = 'cumulus_triple_state'; // 本地只存用户操作状态
+    const cloudEnabled = !!(JSONBIN_MASTER_KEY && JSONBIN_BIN_ID);
+
+    // 计数数据（云端同步）
+    let counts = { like: 0, fav: 0, coin: 0 };
+    // 用户操作状态（本地存储：是否已点赞/收藏/今天是否投币）
+    let userState = loadUserState();
+
+    function loadUserState() {
         try {
-            const raw = localStorage.getItem(STORAGE_KEY);
+            const raw = localStorage.getItem(LOCAL_STATE_KEY);
             if (raw) return JSON.parse(raw);
         } catch (e) {}
-        return { like: 0, fav: 0, coin: 0, liked: false, faved: false, coinDate: '' };
+        return { liked: false, faved: false, coinDate: '' };
     }
 
-    // 保存数据
-    function saveTriple(data) {
+    function saveUserState() {
         try {
-            localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+            localStorage.setItem(LOCAL_STATE_KEY, JSON.stringify(userState));
         } catch (e) {}
     }
 
-    // 获取今天日期字符串
     function todayStr() {
         const d = new Date();
         return d.getFullYear() + '-' + (d.getMonth() + 1) + '-' + d.getDate();
     }
-
-    let triple = loadTriple();
 
     const likeBtn = document.getElementById('likeBtn');
     const favBtn = document.getElementById('favBtn');
@@ -79,17 +85,15 @@ document.addEventListener('DOMContentLoaded', function () {
     const coinCount = document.getElementById('coinCount');
     const tripleAll = document.getElementById('tripleAll');
 
-    // 刷新显示
     function renderTriple() {
-        if (likeCount) likeCount.textContent = triple.like;
-        if (favCount) favCount.textContent = triple.fav;
-        if (coinCount) coinCount.textContent = triple.coin;
-        if (likeBtn) likeBtn.classList.toggle('active', triple.liked);
-        if (favBtn) favBtn.classList.toggle('active', triple.faved);
-        if (coinBtn) coinBtn.classList.toggle('active', triple.coinDate === todayStr());
+        if (likeCount) likeCount.textContent = counts.like;
+        if (favCount) favCount.textContent = counts.fav;
+        if (coinCount) coinCount.textContent = counts.coin;
+        if (likeBtn) likeBtn.classList.toggle('active', userState.liked);
+        if (favBtn) favBtn.classList.toggle('active', userState.faved);
+        if (coinBtn) coinBtn.classList.toggle('active', userState.coinDate === todayStr());
     }
 
-    // 按钮弹跳动画
     function popBtn(btn) {
         if (!btn) return;
         btn.classList.remove('pop');
@@ -97,37 +101,94 @@ document.addEventListener('DOMContentLoaded', function () {
         btn.classList.add('pop');
     }
 
+    // ====== 云端读写 ======
+    async function fetchCounts() {
+        if (!cloudEnabled) return;
+        try {
+            const res = await fetch(`https://api.jsonbin.io/v3/b/${JSONBIN_BIN_ID}/latest`, {
+                headers: { 'X-Master-Key': JSONBIN_MASTER_KEY }
+            });
+            if (!res.ok) throw new Error('fetch failed');
+            const data = await res.json();
+            if (data && data.record) {
+                counts.like = parseInt(data.record.like) || 0;
+                counts.fav = parseInt(data.record.fav) || 0;
+                counts.coin = parseInt(data.record.coin) || 0;
+                renderTriple();
+            }
+        } catch (e) {
+            console.warn('三连数据拉取失败，使用本地默认值', e);
+        }
+    }
+
+    let syncing = false;
+    async function pushCounts() {
+        if (!cloudEnabled) return;
+        if (syncing) return;
+        syncing = true;
+        try {
+            const res = await fetch(`https://api.jsonbin.io/v3/b/${JSONBIN_BIN_ID}`, {
+                method: 'PUT',
+                headers: {
+                    'X-Master-Key': JSONBIN_MASTER_KEY,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    like: counts.like,
+                    fav: counts.fav,
+                    coin: counts.coin
+                })
+            });
+            if (!res.ok) throw new Error('push failed');
+            const data = await res.json();
+            if (data && data.record) {
+                counts.like = parseInt(data.record.like) || 0;
+                counts.fav = parseInt(data.record.fav) || 0;
+                counts.coin = parseInt(data.record.coin) || 0;
+                renderTriple();
+            }
+        } catch (e) {
+            console.warn('三连数据同步失败', e);
+        } finally {
+            syncing = false;
+        }
+    }
+
+    // 初始化：先渲染本地状态，再拉云端
     renderTriple();
+    fetchCounts();
 
     // 点赞
     if (likeBtn) {
         likeBtn.addEventListener('click', function () {
-            if (triple.liked) {
-                triple.like = Math.max(0, triple.like - 1);
-                triple.liked = false;
+            if (userState.liked) {
+                counts.like = Math.max(0, counts.like - 1);
+                userState.liked = false;
             } else {
-                triple.like += 1;
-                triple.liked = true;
+                counts.like += 1;
+                userState.liked = true;
             }
-            saveTriple(triple);
+            saveUserState();
             renderTriple();
             popBtn(likeBtn);
+            pushCounts();
         });
     }
 
     // 收藏
     if (favBtn) {
         favBtn.addEventListener('click', function () {
-            if (triple.faved) {
-                triple.fav = Math.max(0, triple.fav - 1);
-                triple.faved = false;
+            if (userState.faved) {
+                counts.fav = Math.max(0, counts.fav - 1);
+                userState.faved = false;
             } else {
-                triple.fav += 1;
-                triple.faved = true;
+                counts.fav += 1;
+                userState.faved = true;
             }
-            saveTriple(triple);
+            saveUserState();
             renderTriple();
             popBtn(favBtn);
+            pushCounts();
         });
     }
 
@@ -135,18 +196,17 @@ document.addEventListener('DOMContentLoaded', function () {
     if (coinBtn) {
         coinBtn.addEventListener('click', function () {
             const today = todayStr();
-            if (triple.coinDate === today) {
-                // 今天已投过 → 取消投币
-                triple.coin = Math.max(0, triple.coin - 1);
-                triple.coinDate = '';
+            if (userState.coinDate === today) {
+                counts.coin = Math.max(0, counts.coin - 1);
+                userState.coinDate = '';
             } else {
-                // 今天没投过 → 投币
-                triple.coin += 1;
-                triple.coinDate = today;
+                counts.coin += 1;
+                userState.coinDate = today;
             }
-            saveTriple(triple);
+            saveUserState();
             renderTriple();
             popBtn(coinBtn);
+            pushCounts();
         });
     }
 
@@ -154,30 +214,31 @@ document.addEventListener('DOMContentLoaded', function () {
     if (tripleAll) {
         tripleAll.addEventListener('click', function () {
             let changed = false;
-            if (!triple.liked) {
-                triple.like += 1;
-                triple.liked = true;
+            if (!userState.liked) {
+                counts.like += 1;
+                userState.liked = true;
                 changed = true;
             }
-            if (!triple.faved) {
-                triple.fav += 1;
-                triple.faved = true;
+            if (!userState.faved) {
+                counts.fav += 1;
+                userState.faved = true;
                 changed = true;
             }
             const today = todayStr();
-            if (triple.coinDate !== today) {
-                triple.coin += 1;
-                triple.coinDate = today;
+            if (userState.coinDate !== today) {
+                counts.coin += 1;
+                userState.coinDate = today;
                 changed = true;
             }
             if (changed) {
-                saveTriple(triple);
+                saveUserState();
                 renderTriple();
                 popBtn(likeBtn);
                 setTimeout(function () { popBtn(favBtn); }, 100);
                 setTimeout(function () { popBtn(coinBtn); }, 200);
                 tripleAll.textContent = '三连成功！';
                 setTimeout(function () { tripleAll.textContent = '一键三连'; }, 1500);
+                pushCounts();
             } else {
                 tripleAll.textContent = '今天已经三连过啦~';
                 setTimeout(function () { tripleAll.textContent = '一键三连'; }, 1500);
