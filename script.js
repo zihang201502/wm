@@ -158,16 +158,17 @@ document.addEventListener('DOMContentLoaded', function () {
     renderTriple();
     fetchCounts();
 
-    // 点赞
+    // 点赞（永久一次，不可取消）
     if (likeBtn) {
         likeBtn.addEventListener('click', function () {
             if (userState.liked) {
-                counts.like = Math.max(0, counts.like - 1);
-                userState.liked = false;
-            } else {
-                counts.like += 1;
-                userState.liked = true;
+                likeBtn.style.transition = 'all 0.1s';
+                likeBtn.style.borderColor = 'rgba(255,80,80,0.6)';
+                setTimeout(function () { likeBtn.style.borderColor = ''; }, 600);
+                return;
             }
+            counts.like += 1;
+            userState.liked = true;
             saveUserState();
             renderTriple();
             popBtn(likeBtn);
@@ -175,16 +176,17 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
-    // 收藏
+    // 收藏（永久一次，不可取消）
     if (favBtn) {
         favBtn.addEventListener('click', function () {
             if (userState.faved) {
-                counts.fav = Math.max(0, counts.fav - 1);
-                userState.faved = false;
-            } else {
-                counts.fav += 1;
-                userState.faved = true;
+                favBtn.style.transition = 'all 0.1s';
+                favBtn.style.borderColor = 'rgba(255,80,80,0.6)';
+                setTimeout(function () { favBtn.style.borderColor = ''; }, 600);
+                return;
             }
+            counts.fav += 1;
+            userState.faved = true;
             saveUserState();
             renderTriple();
             popBtn(favBtn);
