@@ -78,19 +78,14 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     const likeBtn = document.getElementById('likeBtn');
-    const favBtn = document.getElementById('favBtn');
     const coinBtn = document.getElementById('coinBtn');
     const likeCount = document.getElementById('likeCount');
-    const favCount = document.getElementById('favCount');
     const coinCount = document.getElementById('coinCount');
-    const tripleAll = document.getElementById('tripleAll');
 
     function renderTriple() {
         if (likeCount) likeCount.textContent = counts.like;
-        if (favCount) favCount.textContent = counts.fav;
         if (coinCount) coinCount.textContent = counts.coin;
         if (likeBtn) likeBtn.classList.toggle('active', userState.liked);
-        if (favBtn) favBtn.classList.toggle('active', userState.faved);
         if (coinBtn) coinBtn.classList.toggle('active', userState.coinDate === todayStr());
     }
 
@@ -175,23 +170,6 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
-    // 收藏（可切换：点了不能重复加，可取消后再点）
-    if (favBtn) {
-        favBtn.addEventListener('click', function () {
-            if (userState.faved) {
-                counts.fav = Math.max(0, counts.fav - 1);
-                userState.faved = false;
-            } else {
-                counts.fav += 1;
-                userState.faved = true;
-            }
-            saveUserState();
-            renderTriple();
-            popBtn(favBtn);
-            pushCounts();
-        });
-    }
-
     // 投币（一天一次，可取消）
     if (coinBtn) {
         coinBtn.addEventListener('click', function () {
@@ -207,42 +185,6 @@ document.addEventListener('DOMContentLoaded', function () {
             renderTriple();
             popBtn(coinBtn);
             pushCounts();
-        });
-    }
-
-    // 一键三连
-    if (tripleAll) {
-        tripleAll.addEventListener('click', function () {
-            let changed = false;
-            if (!userState.liked) {
-                counts.like += 1;
-                userState.liked = true;
-                changed = true;
-            }
-            if (!userState.faved) {
-                counts.fav += 1;
-                userState.faved = true;
-                changed = true;
-            }
-            const today = todayStr();
-            if (userState.coinDate !== today) {
-                counts.coin += 1;
-                userState.coinDate = today;
-                changed = true;
-            }
-            if (changed) {
-                saveUserState();
-                renderTriple();
-                popBtn(likeBtn);
-                setTimeout(function () { popBtn(favBtn); }, 100);
-                setTimeout(function () { popBtn(coinBtn); }, 200);
-                tripleAll.textContent = '三连成功！';
-                setTimeout(function () { tripleAll.textContent = '一键三连'; }, 1500);
-                pushCounts();
-            } else {
-                tripleAll.textContent = '今天已经三连过啦~';
-                setTimeout(function () { tripleAll.textContent = '一键三连'; }, 1500);
-            }
         });
     }
 
